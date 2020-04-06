@@ -1,0 +1,11 @@
+<launch>
+
+  <node
+          pkg="brick_builder"
+          type="pick_demo.py"
+          name="brick_builder_demo"
+          required="true"
+          output="screen"
+  />
+
+</launch>

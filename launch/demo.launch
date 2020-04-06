@@ -1,0 +1,13 @@
+<launch>
+
+  <include file="$(find brick_builder)/launch/start.launch"/>
+
+  <node
+          pkg="brick_builder"
+          type="demo.py"
+          name="brick_builder_demo"
+          required="true"
+          output="screen"
+  />
+
+</launch>
