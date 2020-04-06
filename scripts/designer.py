@@ -1,11 +1,14 @@
+import thread
 import wx
 from wx.lib.floatcanvas.FloatCanvas import FloatCanvas, Circle, Rectangle, Line, Polygon, Point
 
 import numpy as np
+
+import rospy
 from PyKDL import Frame
 
 from MyFrame import MyFrame
-from utils import build_frame
+from utils import build_frame, pi
 
 
 class Brick():
@@ -21,26 +24,41 @@ class Brick():
         self.r = r
 
 
-class MainWin(MyFrame):
+class Designer(MyFrame):
+
+    # config #
+    builder = None
+    brick_size = (0.2, 0.05)
+
+    # bricks #
     cur_index = -1
     bricks = []
     bricks_count = 0
 
-    def __init__(self, parent):
-        super(MainWin, self).__init__(parent)
+    # canvas #
+    canvas_scale = 500
+    canvas_offset = (0, -0.4)
 
+    def __init__(self, builder, brick_size):
+        super(Designer, self).__init__(None)
+
+        # config #
+        self.builder = builder
+        self.brick_size = brick_size
+
+        # bind #
         self.Bind(wx.EVT_LISTBOX, self.on_listBox, self.listBox)
         self.Bind(wx.EVT_BUTTON, self.add_brick, self.button_add)
         self.Bind(wx.EVT_BUTTON, self.remove_brick, self.button_remove)
         self.Bind(wx.EVT_BUTTON, self.update_brick, self.button_update)
         self.Bind(wx.EVT_BUTTON, self.run, self.button_run)
 
+        # canvas #
         self.canvas = FloatCanvas(
             self.draw_panel, size=(600, 500),
             ProjectionFun=None,
             BackgroundColor="White"
         )
-
         self.canvas.Bind(wx.EVT_LEFT_DOWN, self.on_mouse)
         self.canvas.Bind(wx.EVT_LEFT_UP, self.on_mouse)
 
@@ -159,15 +177,11 @@ class MainWin(MyFrame):
                 self.apply_offset((-1, y * 0.1))
             ], LineStyle="Dot", LineWidth=0.1))
 
-    scale = 500
-    offset = (0, -0.4)
-    brick_size = (0.2, 0.05)
-
     def get_box(self, brick, FillColor, LineColor="Black"):
-        brick = ((brick.x + self.offset[0]) * self.scale, (brick.y + self.offset[1]) * self.scale, brick.r)
+        brick = ((brick.x + self.canvas_offset[0]) * self.canvas_scale, (brick.y + self.canvas_offset[1]) * self.canvas_scale, brick.r)
         brick_size = (
-            self.brick_size[0] * self.scale,
-            self.brick_size[1] * self.scale
+            self.brick_size[0] * self.canvas_scale,
+            self.brick_size[1] * self.canvas_scale
         )
         p1 = to_points(brick, (brick_size[0] / 2, brick_size[1] / 2))
         p2 = to_points(brick, (brick_size[0] / 2, -brick_size[1] / 2))
@@ -176,12 +190,26 @@ class MainWin(MyFrame):
         return Polygon([p1, p2, p3, p4], LineWidth=2, FillColor=FillColor, LineColor=LineColor)
 
     def apply_offset(self, point):
-        return ((point[0] + self.offset[0]) * self.scale, (point[1] + self.offset[1]) * self.scale)
+        return ((point[0] + self.canvas_offset[0]) * self.canvas_scale, (point[1] + self.canvas_offset[1]) * self.canvas_scale)
 
     # ---- run ---- #
 
-    def run(self):
-        pass
+    def run(self, event):
+        targets = self.get_targets()
+        self.builder.set_targets(targets)
+        self.builder.show_target()
+        rospy.sleep(2)
+        self.builder.show_source()
+        thread.start_new_thread(self.builder.build, ())
+
+    def get_targets(self):
+        targets = []
+        for brick in self.bricks:
+            transform = dict()
+            transform['xyz'] = [brick.x, 0, brick.y]
+            transform['rpy'] = [-pi/2, 0, brick.r]
+            targets.append(transform)
+        return targets
 
 
 def to_points(brick, point):
@@ -206,7 +234,7 @@ def to_points(brick, point):
 if __name__ == '__main__':
     app = wx.App()
 
-    main_win = MainWin(None)
+    main_win = Designer(None)
     main_win.Show()
 
     app.MainLoop()
