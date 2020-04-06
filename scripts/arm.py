@@ -31,25 +31,35 @@ class Arm:
     auto_commit = True  # type: bool
 
     # gripper parameters #
-    gripper_open_posture = 0.09  # type: float
-    gripper_close_posture = 0.0  # type: float
+    gripper_offset = None  # type: Frame
+    gripper_open_posture = None  # type: float
+    gripper_close_posture = None  # type: float
     gripper_timeout = 0.5  # type: float
     support_surface_name = 'ground'  # type: str
 
-    hand_offset = build_frame((0, 0, -0.3), (0, 0, 0))  # type: Frame
-
-    def __init__(self, arm_name='arm', ref_frame='base_link'):
-
-        # 初始化属性
+    def __init__(
+            self,
+            arm_name,
+            ref_frame,
+            gripper_offset,
+            gripper_open_posture,
+            gripper_close_posture
+    ):
+        # 初始化MoveGroupCommander
         self.cmd = moveit_commander.MoveGroupCommander(arm_name)  # 获取MoveGroupCommander
         self.end_link = self.cmd.get_end_effector_link()  # 获取终端link的名称
         self.ref_frame = ref_frame  # 设置参考link的名称
 
-        # 设置参数
+        # 设置MoveGroupCommander参数
         self.cmd.set_pose_reference_frame(ref_frame)  # 目标位置参考坐标系
         self.cmd.allow_replanning(True)  # 允许重新规划 (5次)
         self.cmd.set_goal_position_tolerance(0.01)  # 位移允许误差
         self.cmd.set_goal_orientation_tolerance(0.05)  # 旋转允许误差
+
+        # 设置gripper参数
+        self.gripper_offset = gripper_offset
+        self.gripper_open_posture = gripper_open_posture
+        self.gripper_close_posture = gripper_close_posture
 
     def destroy(self):
         # 关闭节点
@@ -87,7 +97,7 @@ class Arm:
 
         # 抓取时的姿态
         g.grasp_pose.header.frame_id = self.ref_frame
-        g.grasp_pose.pose = frame_to_pose(target_transform)
+        g.grasp_pose.pose = frame_to_pose(target_transform * self.gripper_offset)
 
         # 夹持器张开和闭合的姿态
         g.pre_grasp_posture = self.JointTrajectory(self.gripper_open_posture, self.gripper_timeout)

@@ -68,9 +68,16 @@ def pose_to_frame(pose):
     return frame
 
 
-def build_frame(xyz, rpy=(0, 0, 0)):
+def build_frame(xyz=(0, 0, 0), rpy=(0, 0, 0)):
     # type: (tuple, tuple) -> Frame
     pos = Vector(xyz[0], xyz[1], xyz[2])
     rot = Rotation.RPY(rpy[0], rpy[1], rpy[2])
     return Frame(rot, pos)
+
+
+def frame(config):
+    # type: (dict) -> Frame
+    xyz = config['xyz'] if config.has_key('xyz') else [0, 0, 0]
+    rpy = config['rpy'] if config.has_key('xyz') else [0, 0, 0]
+    return build_frame(xyz, rpy)
 

@@ -1,97 +1,76 @@
 #!/usr/bin/python2
 # coding=utf-8
-import json
-import rospkg
-from rospkg import RosPack
 
 from PyKDL import Frame
 
 from arm import Arm
 from scene import Scene
-from utils import build_frame, pi
+from utils import build_frame, frame, pi
 
 
 class Builder:
+
+    # instance #
     arm = None  # type: Arm
     scene = None  # type: Scene
 
-    config = None  # type: list
+    # config #
+    base_offset = build_frame((0.1, 0.8, 0))  # type: Frame
+    brick_size = None  # type: tuple
 
-    brick_size = (0.4, 0.1, 0.2)  # type: tuple
-    bricks = []  # type: list
+    # bricks #
+    targets = None  # type: list
+    sources = []
 
-    base_offset = build_frame((0.1, 1, 0))  # type: Frame
-    hand_offset = build_frame((0, 0, -0.16), (0, 0, 0))  # type: Frame
-    rp = rospkg.RosPack()  # type: RosPack
-
-    def __init__(self, arm=None, scene=None):
+    def __init__(self, arm, scene, brick_size):
         self.arm = arm
         self.scene = scene
+        self.brick_size = brick_size
 
-    # ---- load ---- #
+    # ---- public ---- #
 
-    def load_from_path(self, config_path):
-        with open(config_path, 'r') as config_file:
-            config = json.load(config_file)
-            self.load(config)
+    def set_targets(self, targets):
+        self.targets = targets
+        self.targets.sort(key=lambda x: x['xyz'][2] * 10000 + -x['xyz'][1] * 100 + x['xyz'][0])
 
-    def load(self, config):
-        self.config = config
-        self.sort_config()
-
-    # ---- scene ---- #
-
-    def prepare_scene(self):
+    def show_source(self):
         self.reset_scene()
-        for y in range(1, -3, -1):
-            for x in range(-1, 2, 2):
-                self.add_brick((0.37 * x, y * 0.3, self.brick_size[2] / 2))
-                if len(self.bricks) >= len(self.config):
-                    return
         for y in range(0, -3, -1):
             for x in range(-1, 2, 2):
-                self.add_brick((0.63 * x, -0.15 + y * 0.3, self.brick_size[2] / 2))
-                if len(self.bricks) >= len(self.config):
+                self.add_brick(build_frame((0.37 * x, y * (self.brick_size[1] * 2 + 0.01), self.brick_size[2] / 2), (pi, 0, 0)))
+                if len(self.sources) >= len(self.targets):
+                    return
+            for x in range(-1, 2, 2):
+                self.add_brick(build_frame((0.5 * x, (y - 0.5) * (self.brick_size[1] * 2 + 0.01), self.brick_size[2] / 2), (pi, 0, 0)))
+                if len(self.sources) >= len(self.targets):
                     return
 
     def show_target(self):
         self.reset_scene()
-        for target in self.config:
-            target = self.base_offset * build_frame(target['xyz'], target['rpy'])
-            self.add_brick((
-                target.p.x(), target.p.y(), target.p.z()
-            ), target.M.GetRPY())
-
-    def reset_scene(self):
-        while len(self.bricks) > 0:
-            self.bricks.pop()
-            self.scene.remove_object('brick' + str(len(self.bricks)))
-
-    # ---- build ---- #
+        for config in self.targets:
+            self.add_brick(self.base_offset * frame(config))
 
     def build(self):
-        for index in range(0, len(self.config), 1):
-            config = self.config[index]
-            target = self.base_offset * build_frame(config['xyz'], config['rpy'])
-            self.from_point_to_point(self.bricks[index], target, index)
+        for index in range(0, len(self.targets), 1):
+            source = self.sources[index]
+            target = self.base_offset * frame(self.targets[index])
+            self.from_point_to_point(source, target, index)
 
-    # ---- utils ---- #
+    # ---- private ---- #
 
-    def get_path(self):
-        return self.rp.get_path('brick_builder')
+    def reset_scene(self):
+        while len(self.sources) > 0:
+            self.sources.pop()
+            self.scene.remove_object('brick' + str(len(self.sources)))
 
-    def sort_config(self):
-        self.config.sort(key=lambda x: x['xyz'][2]*10000 + -x['xyz'][1]*100 + x['xyz'][0])
-
-    def add_brick(self, xyz, rpy=(pi, 0, 0)):
-        transform = build_frame(xyz, rpy)
+    def add_brick(self, transform):
         self.scene.add_box(
-            'brick' + str(len(self.bricks)),
+            'brick' + str(len(self.sources)),
             self.brick_size,
             transform,
             (1, 1, 0, 1)
         )
-        self.bricks.append(transform)
+        self.sources.append(transform)
 
     def from_point_to_point(self, frame1, frame2, index):
 
@@ -103,7 +82,7 @@ class Builder:
 
         self.arm.pick(
             'brick' + str(index),
-            frame1 * self.hand_offset,
+            frame1,
             self.arm.GripperTranslation((0, 0, -1), 0.1, 0.05),
             self.arm.GripperTranslation((0, 0, 1), 0.1, 0.05),
             allowed_touch_objects
@@ -116,25 +95,3 @@ class Builder:
             self.arm.GripperTranslation((0, -1, 0), 0.1, 0.05),
             allowed_touch_objects
         )
-
-        # self.arm.pick('brick' + str(index), frame1 * self.hand_offset)
-        # # pick
-        # self.arm.to_transform(frame1 * build_frame((0, 0, -0.2)) * self.hand_offset, cartesian=False)
-        # self.arm.to_transform(frame1 * self.hand_offset)
-        # rospy.sleep(1)
-        # self.arm.pick('brick' + str(index), frame1 * self.hand_offset)
-        # self.close()
-        # rospy.sleep(1)
-        # self.arm.to_transform(frame1 * build_frame((0, 0, -0.2)) * self.hand_offset)
-        #
-        # # xxx
-        # self.arm.to_transform(build_frame((0, 0.6, 0.4), frame2.M.GetRPY()) * self.hand_offset, cartesian=False)
-        #
-        # place
-        # self.arm.to_transform(build_frame((0, -0.05, 0.05)) * frame2 * self.hand_offset, auto_commit=False)
-        # self.arm.to_transform(build_frame((0, 0, 0.05)) * frame2 * self.hand_offset, auto_commit=False)
-        # self.arm.to_transform(frame2 * self.hand_offset)
-        # # rospy.sleep(1)
-        # # self.open()
-        # self.arm.cmd.detach_object('brick' + str(index))
-        # self.arm.global_translate((0, -0.05, 0))
