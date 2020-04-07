@@ -1,5 +1,7 @@
 <launch>
 
+  <param name="use_gazebo" value="false"/>
+
   <include file="$(find panda_moveit_config)/launch/demo.launch"/>
 
   <node

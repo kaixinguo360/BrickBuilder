@@ -5,6 +5,7 @@ from PyKDL import Frame
 
 from arm import Arm
 from scene import Scene
+from gazebo_utils import GazeboUtils
 from utils import build_frame, frame, pi
 
 
@@ -13,6 +14,7 @@ class Builder:
     # instance #
     arm = None  # type: Arm
     scene = None  # type: Scene
+    gazebo_utils = None  # type: GazeboUtils
 
     # config #
     base_offset = build_frame((0.1, 0.8, 0))  # type: Frame
@@ -22,10 +24,11 @@ class Builder:
     targets = None  # type: list
     sources = []
 
-    def __init__(self, arm, scene, brick_size):
+    def __init__(self, arm, scene, brick_size, gazebo_utils=None):
         self.arm = arm
         self.scene = scene
         self.brick_size = brick_size
+        self.gazebo_utils = gazebo_utils
 
     # ---- public ---- #
 
@@ -37,13 +40,13 @@ class Builder:
         self.reset_scene()
         for y in range(0, -3, -1):
             for x in range(-1, 2, 2):
+                if len(self.sources) >= len(self.targets):
+                    return
                 self.add_brick(build_frame((0.37 * x, y * (self.brick_size[1] * 2 + 0.01), self.brick_size[2] / 2), (pi, 0, 0)))
-                if len(self.sources) >= len(self.targets):
-                    return
             for x in range(-1, 2, 2):
-                self.add_brick(build_frame((0.5 * x, (y - 0.5) * (self.brick_size[1] * 2 + 0.01), self.brick_size[2] / 2), (pi, 0, 0)))
                 if len(self.sources) >= len(self.targets):
                     return
+                self.add_brick(build_frame((0.5 * x, (y - 0.5) * (self.brick_size[1] * 2 + 0.01), self.brick_size[2] / 2), (pi, 0, 0)))
 
     def show_target(self):
         self.reset_scene()
@@ -61,15 +64,26 @@ class Builder:
     def reset_scene(self):
         while len(self.sources) > 0:
             self.sources.pop()
-            self.scene.remove_object('brick' + str(len(self.sources)))
+            name = 'brick' + str(len(self.sources))
+
+            self.scene.remove_object(name)
+            if self.gazebo_utils is not None:
+                self.gazebo_utils.delete_bricks(name)
 
     def add_brick(self, transform):
+        name = 'brick' + str(len(self.sources))
         self.scene.add_box(
-            'brick' + str(len(self.sources)),
+            name,
             self.brick_size,
             transform,
             (1, 1, 0, 1)
         )
+        if self.gazebo_utils is not None:
+            self.gazebo_utils.spawn_bricks(
+                name,
+                self.brick_size,
+                transform
+            )
         self.sources.append(transform)
 
     def from_point_to_point(self, frame1, frame2, index):

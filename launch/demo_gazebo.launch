@@ -1,5 +1,7 @@
 <launch>
 
+  <param name="use_gazebo" value="true"/>
+
   <include file="$(find panda_simulation)/launch/simulation.launch"/>
 
   <node

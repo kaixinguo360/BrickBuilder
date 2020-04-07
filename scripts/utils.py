@@ -1,12 +1,11 @@
 #!/usr/bin/python2
 # coding=utf-8
 import sys
-import rospy
-import moveit_commander
 
+import moveit_commander
+import rospy
 from PyKDL import Frame, Vector, Rotation
-from geometry_msgs.msg import PoseStamped, Pose, Vector3Stamped
-from moveit_msgs.msg import GripperTranslation
+from geometry_msgs.msg import PoseStamped, Pose
 
 pi = 3.1415926
 
