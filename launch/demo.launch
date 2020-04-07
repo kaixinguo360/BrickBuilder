@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find brick_builder)/launch/start.launch"/>
+  <include file="$(find panda_moveit_config)/launch/demo.launch"/>
 
   <node
           pkg="brick_builder"

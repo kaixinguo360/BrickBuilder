@@ -1,8 +1,10 @@
 <launch>
 
+  <include file="$(find panda_simulation)/launch/simulation.launch"/>
+
   <node
           pkg="brick_builder"
-          type="pick_demo.py"
+          type="demo.py"
           name="brick_builder_demo"
           required="true"
           output="screen"
