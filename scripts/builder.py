@@ -17,7 +17,7 @@ class Builder:
     gazebo_utils = None  # type: GazeboUtils
 
     # config #
-    base_offset = build_frame((0.1, 0.8, 0))  # type: Frame
+    base_offset = build_frame((0.1, 0.6, 0))  # type: Frame
     brick_size = None  # type: tuple
 
     # bricks #
@@ -34,11 +34,11 @@ class Builder:
 
     def set_targets(self, targets):
         self.targets = targets
-        self.targets.sort(key=lambda x: x['xyz'][2] * 10000 + -x['xyz'][1] * 100 + x['xyz'][0])
+        self.targets.sort(key=lambda t: t.p.z() * 10000 + -t.p.y() * 100 + t.p.x())
 
     def show_source(self):
         self.reset_scene()
-        for y in range(0, -3, -1):
+        for y in range(1, -10, -1):
             for x in range(-1, 2, 2):
                 if len(self.sources) >= len(self.targets):
                     return
@@ -50,13 +50,13 @@ class Builder:
 
     def show_target(self):
         self.reset_scene()
-        for config in self.targets:
-            self.add_brick(self.base_offset * frame(config))
+        for transform in self.targets:
+            self.add_brick(self.base_offset * transform)
 
     def build(self):
         for index in range(0, len(self.targets), 1):
             source = self.sources[index]
-            target = self.base_offset * frame(self.targets[index])
+            target = self.base_offset * self.targets[index]
             self.from_point_to_point(source, target, index)
 
     # ---- private ---- #

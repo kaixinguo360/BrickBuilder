@@ -60,7 +60,7 @@ class MyFrame(wx.Frame):
         propSizer.Add(self.m_staticText20, 0, wx.ALL, 5)
 
         self.textBox_name = wx.TextCtrl(propGroupSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                        wx.DefaultSize, 0)
+                                        wx.DefaultSize, wx.TE_PROCESS_ENTER)
         propSizer.Add(self.textBox_name, 0, wx.ALL, 5)
 
         self.m_staticText14 = wx.StaticText(propGroupSizer.GetStaticBox(), wx.ID_ANY, u"横向位置", wx.DefaultPosition,
@@ -69,7 +69,7 @@ class MyFrame(wx.Frame):
         propSizer.Add(self.m_staticText14, 0, wx.ALL, 5)
 
         self.textBox_X = wx.TextCtrl(propGroupSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                     wx.DefaultSize, 0)
+                                     wx.DefaultSize, wx.TE_PROCESS_ENTER)
         propSizer.Add(self.textBox_X, 0, wx.ALL, 5)
 
         self.m_staticText15 = wx.StaticText(propGroupSizer.GetStaticBox(), wx.ID_ANY, u"纵向位置", wx.DefaultPosition,
@@ -78,7 +78,7 @@ class MyFrame(wx.Frame):
         propSizer.Add(self.m_staticText15, 0, wx.ALL, 5)
 
         self.textBox_Y = wx.TextCtrl(propGroupSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                     wx.DefaultSize, 0)
+                                     wx.DefaultSize, wx.TE_PROCESS_ENTER)
         propSizer.Add(self.textBox_Y, 0, wx.ALL, 5)
 
         self.m_staticText16 = wx.StaticText(propGroupSizer.GetStaticBox(), wx.ID_ANY, u"旋转角度", wx.DefaultPosition,
@@ -87,14 +87,21 @@ class MyFrame(wx.Frame):
         propSizer.Add(self.m_staticText16, 0, wx.ALL, 5)
 
         self.textBox_R = wx.TextCtrl(propGroupSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition,
-                                     wx.DefaultSize, 0)
+                                     wx.DefaultSize, wx.TE_PROCESS_ENTER)
         propSizer.Add(self.textBox_R, 0, wx.ALL, 5)
 
         propSizer.AddSpacer((0, 0), 1, wx.EXPAND, 5)
 
-        self.button_update = wx.Button(propGroupSizer.GetStaticBox(), wx.ID_ANY, u"更新", wx.DefaultPosition,
+        self.button_rotate = wx.Button(propGroupSizer.GetStaticBox(), wx.ID_ANY, u"旋转", wx.DefaultPosition,
                                        wx.DefaultSize, 0)
-        propSizer.Add(self.button_update, 0, wx.ALL, 5)
+        propSizer.Add(self.button_rotate, 0, wx.ALL, 5)
+
+        propSizer.AddSpacer((0, 0), 1, wx.EXPAND, 5)
+
+        self.is_aligned = wx.CheckBox(propGroupSizer.GetStaticBox(), wx.ID_ANY, u"对齐到网格", wx.DefaultPosition,
+                                      wx.DefaultSize, 0)
+        self.is_aligned.SetValue(True)
+        propSizer.Add(self.is_aligned, 0, wx.ALL, 5)
 
         propGroupSizer.Add(propSizer, 1, wx.EXPAND, 5)
 
