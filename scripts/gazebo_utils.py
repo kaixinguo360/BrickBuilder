@@ -20,7 +20,7 @@ class GazeboUtils:
         pass
 
     def spawn_bricks(self, name, size, transform):
-        print 'SPAWN BRICK [' + name + ']'
+        rospy.loginfo('SPAWN BRICK [' + name + ']')
 
         req = SpawnModelRequest()
         req.model_name = name
@@ -33,7 +33,7 @@ class GazeboUtils:
         self.spawn_model(req)
 
     def delete_bricks(self, name):
-        print 'DELETE BRICK [' + name + ']'
+        rospy.loginfo('DELETE BRICK [' + name + ']')
         self.delete_model(name)
 
 
@@ -90,7 +90,5 @@ def create_brick(name, size):
         '{}'
         '</robot>'
     ).format(name, link, gazebo)
-
-    print model
 
     return model

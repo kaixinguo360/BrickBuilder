@@ -1,14 +1,12 @@
 #!/usr/bin/python2
 # coding=utf-8
-import json
-import rospkg
 from wx import wx
 
-from scene import Scene
 from arm import Arm
 from builder import Builder
 from designer import Designer
 from gazebo_utils import GazeboUtils
+from scene import Scene
 from utils import *
 
 init('moveit_demo')
@@ -47,14 +45,4 @@ designer = Designer(builder, (brick_size[0], brick_size[1]))
 designer.Show()
 app.MainLoop()
 
-# rp = rospkg.RosPack()
-# config_file = open(rp.get_path('brick_builder') + '/config/demo.json', 'r')
-# builder.set_targets(json.load(config_file))
-#
-# builder.show_target()
-# rospy.sleep(2)
-# builder.show_source()
-# builder.build()
-
-# rospy.spin()
 

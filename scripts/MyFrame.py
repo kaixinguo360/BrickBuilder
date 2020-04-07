@@ -18,8 +18,8 @@ import wx.xrc
 class MyFrame(wx.Frame):
 
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=wx.EmptyString, pos=wx.DefaultPosition,
-                          size=wx.Size(810, 636), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=u"图纸编辑器", pos=wx.DefaultPosition, size=wx.Size(810, 601),
+                          style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
 
         self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
@@ -113,29 +113,42 @@ class MyFrame(wx.Frame):
         mainSizer.Add(sideSizer, wx.GBPosition(0, 1), wx.GBSpan(1, 1), wx.EXPAND, 5)
 
         self.opt_panel = wx.Panel(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL)
-        sbSizer4 = wx.StaticBoxSizer(wx.StaticBox(self.opt_panel, wx.ID_ANY, u"操作"), wx.HORIZONTAL)
+        bSizer3 = wx.BoxSizer(wx.HORIZONTAL)
+
+        sbSizer5 = wx.StaticBoxSizer(wx.StaticBox(self.opt_panel, wx.ID_ANY, u"操作"), wx.HORIZONTAL)
+
+        sbSizer5.AddSpacer((0, 0), 1, wx.EXPAND, 5)
+
+        self.button_run = wx.Button(sbSizer5.GetStaticBox(), wx.ID_ANY, u"运行", wx.DefaultPosition, wx.DefaultSize, 0)
+        sbSizer5.Add(self.button_run, 0, wx.ALL, 5)
+
+        self.button_load = wx.Button(sbSizer5.GetStaticBox(), wx.ID_ANY, u"打开", wx.DefaultPosition, wx.DefaultSize, 0)
+        sbSizer5.Add(self.button_load, 0, wx.ALL, 5)
+
+        self.button_save = wx.Button(sbSizer5.GetStaticBox(), wx.ID_ANY, u"保存", wx.DefaultPosition, wx.DefaultSize, 0)
+        sbSizer5.Add(self.button_save, 0, wx.ALL, 5)
+
+        bSizer3.Add(sbSizer5, 1, wx.EXPAND | wx.RIGHT | wx.LEFT, 5)
+
+        sbSizer4 = wx.StaticBoxSizer(wx.StaticBox(self.opt_panel, wx.ID_ANY, u"构件"), wx.HORIZONTAL)
 
         sbSizer4.SetMinSize(wx.Size(-1, 80))
-
-        sbSizer4.AddSpacer((0, 0), 1, wx.EXPAND, 5)
-
-        self.button_run = wx.Button(sbSizer4.GetStaticBox(), wx.ID_ANY, u"运行", wx.DefaultPosition, wx.DefaultSize, 0)
-        sbSizer4.Add(self.button_run, 0, wx.ALL, 5)
-
         self.button_add = wx.Button(sbSizer4.GetStaticBox(), wx.ID_ANY, u"添加", wx.DefaultPosition, wx.DefaultSize, 0)
         sbSizer4.Add(self.button_add, 0, wx.ALL, 5)
 
         self.button_remove = wx.Button(sbSizer4.GetStaticBox(), wx.ID_ANY, u"删除", wx.DefaultPosition, wx.DefaultSize, 0)
         sbSizer4.Add(self.button_remove, 0, wx.ALL, 5)
 
-        self.opt_panel.SetSizer(sbSizer4)
+        bSizer3.Add(sbSizer4, 0, wx.EXPAND | wx.RIGHT | wx.LEFT, 5)
+
+        self.opt_panel.SetSizer(bSizer3)
         self.opt_panel.Layout()
-        sbSizer4.Fit(self.opt_panel)
-        mainSizer.Add(self.opt_panel, wx.GBPosition(1, 0), wx.GBSpan(1, 2), wx.EXPAND | wx.RIGHT | wx.LEFT, 5)
+        bSizer3.Fit(self.opt_panel)
+        mainSizer.Add(self.opt_panel, wx.GBPosition(1, 0), wx.GBSpan(1, 2), wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT,
+                      5)
 
         self.SetSizer(mainSizer)
         self.Layout()
-        self.status_bar = self.CreateStatusBar(1, wx.ST_SIZEGRIP, wx.ID_ANY)
 
         self.Centre(wx.BOTH)
 

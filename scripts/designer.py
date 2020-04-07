@@ -1,15 +1,19 @@
+#!/usr/bin/python2
+# coding=utf-8
+import json
+import numpy as np
+import os
 import thread
 import wx
-from wx.lib.floatcanvas.FloatCanvas import FloatCanvas, Circle, Rectangle, Line, Polygon, Point
-
-import numpy as np
-# from wx.lib.pubsub.core.arg1.publisher import Publisher
+from wx.lib.floatcanvas.FloatCanvas import FloatCanvas, Line, Polygon
 
 import rospy
-from PyKDL import Frame
 
 from MyFrame import MyFrame
 from utils import build_frame, pi
+
+
+# from wx.lib.pubsub.core.arg1.publisher import Publisher
 
 
 class Brick():
@@ -23,6 +27,14 @@ class Brick():
         self.x = x
         self.y = y
         self.r = r
+
+    def to_dict(self):
+        d = dict()
+        d['name'] = self.name
+        d['x'] = self.x
+        d['y'] = self.y
+        d['r'] = self.r
+        return d
 
 
 class Designer(MyFrame):
@@ -53,6 +65,9 @@ class Designer(MyFrame):
         self.Bind(wx.EVT_BUTTON, self.remove_brick, self.button_remove)
         self.Bind(wx.EVT_BUTTON, self.rotate_brick, self.button_rotate)
         self.Bind(wx.EVT_BUTTON, self.run, self.button_run)
+
+        self.Bind(wx.EVT_BUTTON, self.load, self.button_load)
+        self.Bind(wx.EVT_BUTTON, self.save, self.button_save)
 
         self.Bind(wx.EVT_TEXT_ENTER, self.update_brick, self.textBox_name)
         self.Bind(wx.EVT_TEXT_ENTER, self.update_input, self.textBox_X)
@@ -278,6 +293,50 @@ class Designer(MyFrame):
         elif event.ButtonUp():
             self.down_pos = None
             self.pre_pos = None
+
+    # ---- file ---- #
+
+    def load(self, event):
+        dlg = wx.FileDialog(self, "加载图纸",
+                            defaultDir=os.getcwd(),
+                            wildcard='图纸文件 (*.dsg)|*.dsg|全部文件|*',
+                            style=wx.OPEN|wx.FILE_MUST_EXIST)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            try:
+                with open(dlg.GetPath(), 'r') as design_file:
+                    bricks = []
+                    for target in json.load(design_file):
+                        bricks.append(Brick(target['name'], target['x'], target['y'], target['r']))
+                    self.bricks = bricks
+                    self.cur_index = -1
+                    self.refresh()
+            except BaseException, e:
+                error_dlg = wx.MessageDialog(None, "无法识别的图纸文件!\n错误详情: " + e.message, "加载失败", wx.ICON_ERROR)
+                error_dlg.ShowModal()
+                error_dlg.Destroy()
+
+        dlg.Destroy()
+
+    def save(self, event):
+        dlg = wx.FileDialog(self, "保存图纸",
+                            defaultDir=os.getcwd(),
+                            wildcard='图纸文件 (*.dsg)|*.dsg|全部文件|*',
+                            style=wx.SAVE|wx.OVERWRITE_PROMPT)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            try:
+                with open(dlg.GetPath(), 'w') as design_file:
+                    targets = []
+                    for brick in self.bricks:
+                        targets.append(brick.to_dict())
+                    design_file.write(json.dumps(targets))
+            except BaseException, e:
+                error_dlg = wx.MessageDialog(None, "无法写入目标文件!\n错误详情: " + e.message, "保存失败", wx.ICON_ERROR)
+                error_dlg.ShowModal()
+                error_dlg.Destroy()
+
+        dlg.Destroy()
 
 
 def to_points(brick, point):

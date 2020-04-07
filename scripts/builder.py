@@ -92,8 +92,6 @@ class Builder:
         for i in range(0, index, 1):
             allowed_touch_objects.append('brick' + str(i))
 
-        print allowed_touch_objects
-
         self.arm.pick(
             'brick' + str(index),
             frame1,

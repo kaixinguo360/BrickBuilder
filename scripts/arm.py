@@ -296,5 +296,4 @@ class Arm:
 
         trajectory.points = [point]
 
-        # print(trajectory)
         return trajectory
