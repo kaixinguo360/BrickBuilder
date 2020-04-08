@@ -1,7 +1,7 @@
 <package>
 
   <name>brick_builder</name>
-  <version>0.3.0</version>
+  <version>1.0.0</version>
   <description>
      An automatically generated package with all the configuration and launch files for using the arm_robot with the MoveIt! Motion Planning Framework
   </description>
@@ -10,9 +10,9 @@
 
   <license>BSD</license>
 
-  <url type="website">http://moveit.ros.org/</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit</url>
+  <url type="website">https://github.com/kaixinguo360/BrickBuilder</url>
+  <url type="bugtracker">https://github.com/kaixinguo360/BrickBuilder/issues</url>
+  <url type="repository">https://github.com/kaixinguo360/BrickBuilder</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -25,10 +25,15 @@
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>xacro</run_depend>
+
   <!-- This package is referenced in the warehouse launch files, but does not build out of the box at the moment. Commented the dependency until this works. -->
   <!-- <run_depend>warehouse_ros_mongo</run_depend> -->
-  <build_depend>arm_description</build_depend>
-  <run_depend>arm_description</run_depend>
+
+  <build_depend>panda_moveit_config</build_depend>
+  <run_depend>panda_moveit_config</run_depend>
+
+<!--  <build_depend>panda_simulation</build_depend>-->
+<!--  <run_depend>panda_simulation</run_depend>-->
 
 
 </package>

@@ -1,12 +1,12 @@
 <launch>
 
-  <param name="use_gazebo" value="false"/>
+  <param name="use_gazebo" value="true"/>
 
-  <include file="$(find panda_moveit_config)/launch/demo.launch"/>
+  <include file="$(find panda_simulation)/launch/simulation.launch"/>
 
   <node
           pkg="brick_builder"
-          type="demo.py"
+          type="run.py"
           name="brick_builder_demo"
           required="true"
           output="screen"

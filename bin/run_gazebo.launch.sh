@@ -2,4 +2,4 @@
 
 source $(dirname $(realpath $0))/../../../devel/setup.bash
 
-/opt/ros/kinetic/bin/roslaunch brick_builder demo.launch
+/opt/ros/kinetic/bin/roslaunch brick_builder run_gazebo.launch

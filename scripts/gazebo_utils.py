@@ -58,7 +58,7 @@ def create_brick(name, size):
         '</collision>'
     ).format(size[0], size[1], size[2])
 
-    mass = 0.1
+    mass = 0.01
     radius = (size[0] + size[1]) / 4
     length = size[2]
     inertial = (
@@ -81,6 +81,10 @@ def create_brick(name, size):
     gazebo = (
         '<gazebo reference="{}">'
         '  <material>Gazebo/Yellow</material>'
+        '  <mu1>1.0</mu1>'
+        '  <mu2>1.0</mu2>'
+        '  <minDepth>0.01</minDepth>'
+        '  <maxVel>0</maxVel>'
         '</gazebo>'
     ).format(name)
 
